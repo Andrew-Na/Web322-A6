@@ -23,7 +23,7 @@ exports.initialize = function() {
     return new Promise(function(resolve,reject){
         let db = mongoose.createConnection(uri, { useNewUrlParser: true, useUnifiedTopology: true }, function(error){
             if(error) {
-                console.log(error);
+                //console.log(error);
                 reject(error);
             }
             else {
@@ -61,16 +61,16 @@ exports.registerUser = function(userData){
 
 exports.checkUser = function(userData){
     return new Promise(function(resolve,reject){ 
-        User.findOne({"userName": userData.userName}).lean().then((foundUser)=>{
+        User.findOne({"userName": userData.userName}).lean().exec().then((foundUser)=>{
             if (!foundUser) reject("Unable to find user: " + userData.userName);
             else{ 
                 bcrypt.compare(userData.password, foundUser.password).then((res) => {
                     if (res === false)
-                        reject("Incorrect password for user: " + userData.password);
+                        reject("Incorrect password for user: " + userData.userName);
                     else{
                         //using unshift so most recent login will be at beginning of array
                         foundUser.loginHistory.unshift({dateTime: (new Date()).toString(), userAgent: userData.userAgent});
-                        console.log((new Date()));
+                        //console.log((new Date()));
                         User.updateOne({"userName":foundUser.userName},
                         {$set:{loginHistory:foundUser.loginHistory}}
                         ).then(()=>{

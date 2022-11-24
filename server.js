@@ -1,12 +1,12 @@
 /*********************************************************************************
-* WEB322 – Assignment 5
+* WEB322 – Assignment 6
 * I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part 
 * of this assignment has been copied manually or electronically from any other source 
 * (including 3rd party web sites) or distributed to other students.
 * 
-* Name: Andrew Sequeira Student ID: 055099063 Date: November 12, 2022
+* Name: Andrew Sequeira Student ID: 055099063 Date: November 24, 2022
 *
-* Online (Cyclic) Link: https://byzantium-turkey-cap.cyclic.app
+* Online (Cyclic) Link: https://strange-pear-blazer.cyclic.app
 *
 ********************************************************************************/ 
 var express = require("express");
@@ -105,11 +105,9 @@ app.get("/about",(req,res)=>{
 });
 
 app.get("/employees", ensureLogin,(req,res)=>{
-    //console.log(req.query.status);
 
     if (req.query.status)
     {
-        //console.log(req.query.status);
         data_service.getEmployeesByStatus(req.query.status).then((data)=>{
             if (data.length > 0) res.render("employees",{employees: data,style:'site.css'});
             else res.render("employees",{message:"no results"});
@@ -192,8 +190,6 @@ app.get("/images", ensureLogin,(req,res)=>{
     fs.readdir("./public/images/uploaded",function(err,items){
         var imageList = {};
         imageList.images = items;
-        console.log(imageList);
-        // res.json(imageList);
         res.render("images",{imageList : imageList, style:'add.css'});
     });
 });
@@ -245,19 +241,16 @@ app.get("/employee/:empNum", ensureLogin, (req, res) => {
 
 app.get("/department/*", ensureLogin,(req,res)=>{
     data_service.getDepartmentById(req.params[0]).then((data)=>{
-       // console.log(data);
         if (data) //if not undefined
             res.render("department",{department: data, style:'add.css'});
         else
             res.status(404).render("error",{layout: false,errorCode: "404", message:"Department Not Found"});
     }).catch((err)=>{
-        console.log("catch");
         res.status(404).render("error",{layout: false,errorCode: "404", message:"Department Not Found"});;
     });
 });
 
 app.post("/employee/update", ensureLogin, (req, res) => { 
-    console.log(req.body);
     data_service.updateEmployee(req.body).then(()=>{
         res.redirect("/employees");
     }).catch((err)=>{
@@ -267,7 +260,6 @@ app.post("/employee/update", ensureLogin, (req, res) => {
 });
 
 app.post("/department/update", ensureLogin,(req,res)=>{
-    console.log(req.body);
     data_service.updateDepartment(req.body).then(()=>{
         res.redirect("/departments");
     }).catch((err)=>{
@@ -293,7 +285,6 @@ app.get("/register",(req,res)=>{
 });
 
 app.post("/register", (req,res)=>{
-    console.log("in register post");
     dataServiceAuth.registerUser(req.body).then(()=>{
         res.render("register",{successMessage: "User created"});
     }).catch((err)=>{
@@ -304,13 +295,11 @@ app.post("/register", (req,res)=>{
 app.post("/login",(req,res)=>{
     req.body.userAgent = req.get('User-Agent');
     dataServiceAuth.checkUser(req.body).then((user) => {
-        console.log(user);
         req.session.user = {
         userName: user.userName, // complete it with authenticated user's userName
         email: user.email, // complete it with authenticated user's email
         loginHistory: user.loginHistory // complete it with authenticated user's loginHistory
         }
-        console.log(req.session.user)
         res.redirect("/employees");
     }).catch((err)=>{
         res.render("login",{errorMessage: err, userName: req.body.userName});
